@@ -11,7 +11,7 @@ export const Scenario = types
     steps: types.array(Step),
     terminals: types.array(Terminal),
   }).volatile(self => ({
-    socket: {ws: null},
+    socket: null,
     // terminals: []
     // socket: io.connect('//ws.katacoda.com', {
     //   transports: ["websocket"],
@@ -32,17 +32,22 @@ export const Scenario = types
 
     const createContainer = flow(function*() {
       try {
-        const json = yield fetch('http://container.eci.kfcoding.com/containers/workspace', {
+
+          const workspace = {};
+          workspace.dockerImage = 'cpp';
+          workspace.type = 'terminal';
+        const json = yield fetch('http://api.v1.kfcoding.com/api/basic/eci/workspace', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: 'Basic ' + b64EncodeUnicode('admin:admin')
           },
           method: 'POST',
-          body: JSON.stringify({image: 'cpp'})
+          body: JSON.stringify(workspace)
         }).then(resp => resp.json());
-        console.log(json)
-        self.socket.ws = io.connect(json.data[0].term, {transports: ["websocket"], reconnection: true});
+        console.log("22222222",json);
+        // self.socket.ws = io.connect("http://test.sc.kfcoding.com", {transports: ["websocket"], reconnection: true});
+        self.socket.ws = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
         self.socket.ws.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
         self.socket.ws.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
         // self.socket = io(json.data[0].term);
@@ -75,3 +80,4 @@ export const Scenario = types
       }
     }
   });
+

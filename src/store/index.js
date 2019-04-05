@@ -3,6 +3,7 @@ import * as browserfs from "browserfs";
 import * as pify from "pify";
 import * as git from "isomorphic-git";
 import {Course} from "./Course";
+import { FileStore } from "./FileStore";
 import {Scenario} from "./Scenario";
 
 export const Store = types.model('Store', {
@@ -10,12 +11,15 @@ export const Store = types.model('Store', {
   repo: '',
   course: types.optional(Course, {}),
   stepIndex: 0,
-  view: 'terminal'
+  view: 'terminal',
+  fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
+  connect: false,
   // currentScenario: types.maybe(types.reference(Scenario))
 }).volatile(self => ({
   bfs: {},
   pfs: {},
-  currentScenario: null
+  currentScenario: null,
+  socket: null,
 })).actions(self => {
   const fetchCourse = flow(function* (repo) {
     git.plugins.set('fs', self.bfs);
@@ -37,6 +41,14 @@ export const Store = types.model('Store', {
     self.course = config;
 
   })
+
+    function setSocket(socket) {
+        self.socket = socket;
+    }
+
+    function setConnect(flag) {
+        self.connect = flag;
+    }
   return {
     afterCreate: flow(function*() {
       let repo = window.location.hash.substr(1);
@@ -47,6 +59,8 @@ export const Store = types.model('Store', {
       yield fetchCourse(repo);
 
     }),
+    setSocket,
+    setConnect,
     setRepo(repo) {
       self.repo = repo
     },
