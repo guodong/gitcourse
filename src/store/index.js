@@ -4,7 +4,8 @@ import * as pify from "pify";
 import * as git from "isomorphic-git";
 import {Course} from "./Course";
 import { FileStore } from "./FileStore";
-import {Scenario} from "./Scenario";
+import { Scenario } from "./Scenario";
+import { ViewStore } from "./ViewStore";
 
 export const Store = types.model('Store', {
   loading: true,
@@ -14,7 +15,10 @@ export const Store = types.model('Store', {
   view: 'terminal',
   fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
   connect: false,
-  // currentScenario: types.maybe(types.reference(Scenario))
+  ScenarioStore: types.optional(Scenario,{}),
+  viewStore: types.optional(ViewStore, {}),
+
+    // currentScenario: types.maybe(types.reference(Scenario))
 }).volatile(self => ({
   bfs: {},
   pfs: {},
@@ -43,6 +47,7 @@ export const Store = types.model('Store', {
   })
 
     function setSocket(socket) {
+        console.log("7777777")
         self.socket = socket;
     }
 

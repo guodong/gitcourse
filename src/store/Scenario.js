@@ -20,7 +20,9 @@ export const Scenario = types
     //   query: 'dockerimage=dind&course=docker&id=deploying-first-container&originalPathwayId='
     // })
   })).views(self => ({
-
+      get store(){
+          return getRoot(self);
+      }
   })).actions(self => {
 
     function b64EncodeUnicode(str) {
@@ -28,6 +30,11 @@ export const Scenario = types
         function(match, p1) {
           return String.fromCharCode('0x' + p1);
         }));
+    }
+
+    function setSocket(socket) {
+      console.log("11111111",socket);
+      self.socket = socket;
     }
 
     const createContainer = flow(function*() {
@@ -47,11 +54,17 @@ export const Scenario = types
         }).then(resp => resp.json());
         console.log("22222222",json);
         // self.socket.ws = io.connect("http://test.sc.kfcoding.com", {transports: ["websocket"], reconnection: true});
-        self.socket.ws = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
-        self.socket.ws.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
-        self.socket.ws.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
+        let socket = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
+        console.log("666666",socket);
+        self.store.setSocket(socket);
+        self.store.socket.on('connect',()=>{
+            self.store.setConnect(true);
+        })
+        console.log("3333333",self.store);
+        self.store.socket.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
+        self.store.socket.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
         // self.socket = io(json.data[0].term);
-        self.socket.ws.on('term.output', data => {
+        self.store.socket.on('term.output', data => {
           self.terminals[0].terminal.write(data.output)
         })
 
@@ -75,6 +88,7 @@ export const Scenario = types
         self.description = desc;
       },
       createContainer,
+      setSocket,
       addTerminal() {
         self.terminals.push({})
       }
