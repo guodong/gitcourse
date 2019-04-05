@@ -9,7 +9,8 @@ export const ViewStore = types
     workOpen: false
   }).actions(self => ({
     setEditorIndex(idx) {
-      self.editorIndex = idx;
+      self.editorIndex = parseInt(idx);
+      console.log("7777777",self.editorIndex);
     },
     setLoading(loading) {
       self.loading = loading;

@@ -13,6 +13,7 @@ export const File = types
     expanded: false,
     add: '',
     reName: false,
+    id: types.optional(types.number,0),
   }).views(self => ({
     get store() {
       return getRoot(self);
@@ -27,6 +28,10 @@ export const File = types
   })).actions(self => {
     function setReName(flag) {
       self.reName = flag;
+    }
+
+    function setId(index) {
+        self.id = index;
     }
 
     function setName(name) {
@@ -140,6 +145,11 @@ export const File = types
               content = res
             }
             self.setContent(content);
+            let key = self.store.fileStore.openedFileKey;
+            self.setId(key);
+            key = key+1;
+            self.store.fileStore.setOpenedFileKey(key);
+            console.log("每个被装进openedfile中的文件为",self);
             self.store.fileStore.pushOpenedFile(self);
             self.store.viewStore.setEditorIndex(self.store.fileStore.openedFiles.length - 1);
           } else {
@@ -152,6 +162,7 @@ export const File = types
     }
 
     return {
+      setId,
       setReName,
       setPath,
       setName,
@@ -180,8 +191,9 @@ export const FileStore = types
       isDir: true,
       size: 0,
       type: 'file',
-      children: []
-    })
+      children: [],
+    }),
+    openedFileKey: types.optional(types.number,0)
   }).views(self => ({
     get store() {
       return getParent(self)
@@ -194,6 +206,10 @@ export const FileStore = types
       } else {
         self.store.handleError({error: "连接已断开"});
       }
+    }
+
+    function setOpenedFileKey(index) {
+        self.openedFileKey = index;
     }
 
     // TODO
@@ -288,6 +304,7 @@ export const FileStore = types
 
       saveFiles,
       closeFile,
+      setOpenedFileKey,
       pushOpenedFile,
       removeOpenedFile,
       setCurrentFilePath,
