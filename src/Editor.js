@@ -96,22 +96,31 @@ class Editor extends React.Component {
     }
 
     remove = (targetKey) => {
-        let activeKey = this.state.activeKey;
-        let lastIndex;
-        this.state.panes.forEach((pane, i) => {
-            if (pane.key === targetKey) {
+        console.log("remove的targetkey的类型",targetKey);
+        let activeKey = this.props.store.viewStore.editorIndex;
+        console.log("activeKey的值为",activeKey);
+        let lastIndex ,panes;
+        panes = this.props.store.fileStore.openedFiles;
+        panes.forEach((pane, i) => {
+            if (pane.id === parseInt(targetKey)) {
+                console.log("999999999");
                 lastIndex = i - 1;
+                this.props.store.fileStore.removeOpenedFile(pane);
             }
         });
-        const panes = this.state.panes.filter(pane => pane.key !== targetKey);
-        if (panes.length && activeKey === targetKey) {
+        // const panes = this.props.store.fileStore.openedFiles.filter(pane => pane.key !== parseInt(targetKey));
+        if (panes.length && activeKey === parseInt(targetKey)) {
             if (lastIndex >= 0) {
-                activeKey = panes[lastIndex].key;
+                activeKey = panes[lastIndex].id;
             } else {
-                activeKey = panes[0].key;
+                activeKey = panes[0].id;
             }
         }
-        this.setState({ panes, activeKey });
+        if(panes.length === 0){
+          this.props.store.fileStore.setOpenedFileKey(0);
+          this.props.store.viewStore.setEditorIndex(-1);
+        }
+        this.props.store.viewStore.setEditorIndex(activeKey);
     }
   onToggle(node, toggled) {
     if (this.state.cursor) {

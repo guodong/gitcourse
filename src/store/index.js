@@ -2,6 +2,7 @@ import {types, flow} from 'mobx-state-tree';
 import * as browserfs from "browserfs";
 import * as pify from "pify";
 import * as git from "isomorphic-git";
+import {notification} from 'antd';
 import {Course} from "./Course";
 import { FileStore } from "./FileStore";
 import { Scenario } from "./Scenario";
@@ -47,12 +48,21 @@ export const Store = types.model('Store', {
   })
 
     function setSocket(socket) {
-        console.log("7777777")
         self.socket = socket;
     }
 
     function setConnect(flag) {
         self.connect = flag;
+    }
+
+    function handleSuccess(msg) {
+        notification.success({message: "操作成功", description: msg})
+    }
+
+    function handleError(data) {
+        if (data.error) {
+            notification.error({message: "操作失败", description: data.error})
+        }
     }
   return {
     afterCreate: flow(function*() {
@@ -66,6 +76,8 @@ export const Store = types.model('Store', {
     }),
     setSocket,
     setConnect,
+    handleSuccess,
+    handleError,
     setRepo(repo) {
       self.repo = repo
     },

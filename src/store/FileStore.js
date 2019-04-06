@@ -144,14 +144,16 @@ export const File = types
             } else if (res) {
               content = res
             }
+
             self.setContent(content);
             let key = self.store.fileStore.openedFileKey;
             self.setId(key);
+            self.store.viewStore.setEditorIndex(key);
             key = key+1;
             self.store.fileStore.setOpenedFileKey(key);
             console.log("每个被装进openedfile中的文件为",self);
             self.store.fileStore.pushOpenedFile(self);
-            self.store.viewStore.setEditorIndex(self.store.fileStore.openedFiles.length - 1);
+            // self.store.viewStore.setEditorIndex(self.store.fileStore.openedFiles.length - 1);
           } else {
             self.store.handleError(res.error)
           }
