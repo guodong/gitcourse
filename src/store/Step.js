@@ -10,7 +10,7 @@ export const Step = types
     // scenarioDirs: []
   })).actions(self => {
     const fetchText = flow(function* () {
-      let data = yield getRoot(self).pfs.readFile(self.text);
+      let data = yield getRoot(self).pfs.readFile(getRoot(self).dir + '/' + self.text);
       self.content = data.toString();
     })
     return {
