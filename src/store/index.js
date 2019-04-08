@@ -10,7 +10,8 @@ export const Store = types.model('Store', {
   repo: '',
   course: types.optional(Course, {}),
   stepIndex: 0,
-  view: 'terminal'
+  view: 'terminal',
+  dir: new Date().getTime().toString()
   // currentScenario: types.maybe(types.reference(Scenario))
 }).volatile(self => ({
   bfs: {},
@@ -26,13 +27,13 @@ export const Store = types.model('Store', {
     //   singleBranch: true
     // })
     yield git.clone({
-      dir: '.',
+      dir: self.dir,
       corsProxy: 'https://cors.isomorphic-git.org',
       url: repo,
       singleBranch: true,
       depth: 1
     });
-    let data = yield self.pfs.readFile('course.json');
+    let data = yield self.pfs.readFile(self.dir + '/course.json');
     let config = JSON.parse(data.toString());
     self.course = config;
 
@@ -44,6 +45,7 @@ export const Store = types.model('Store', {
       yield pify(browserfs.configure)({fs: "IndexedDB", options: {}});
       self.bfs = browserfs.BFSRequire('fs');
       self.pfs = pify(self.bfs);
+      // yield pfs.
       yield fetchCourse(repo);
 
     }),
