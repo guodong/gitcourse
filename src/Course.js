@@ -29,7 +29,7 @@ class Course extends Component {
                   <List.Item key={s}>
                     <List.Item.Meta
                       avatar={<Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" style={{fontSize: 32}}/>}
-                      title={<a href="https://ant.design">{s.title}</a>}
+                      title={s.title}
                       description={'共 ' + s.steps.length + ' 个步骤'}
                     />
                     <Link to={'/scenario' + window.location.hash}><Button type='primary'
