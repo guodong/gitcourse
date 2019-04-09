@@ -96,7 +96,9 @@ class Editor extends React.Component {
     }
 
     remove = (targetKey) => {
-        this.props.store.viewStore.setRemoveEditorKeyEvent(true);
+        // this.props.store.viewStore.setRemoveEditorKeyEvent(true);
+        // this.props.store.viewStore.setRemoveEditorKey(targetKey);
+        console.log("输出keyEvent的值",this.props.store.viewStore.removeEditorKeyEvent);
         let activeKey = this.props.store.viewStore.editorIndex;
         let lastIndex ,panes;
         panes = this.props.store.fileStore.openedFiles;

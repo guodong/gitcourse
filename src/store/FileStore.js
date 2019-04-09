@@ -13,7 +13,7 @@ export const File = types
     expanded: false,
     add: '',
     reName: false,
-    id: types.optional(types.number,0),
+    id: types.optional(types.number,-1),
   }).views(self => ({
     get store() {
       return getRoot(self);
@@ -151,7 +151,6 @@ export const File = types
             self.store.viewStore.setEditorIndex(key);
             key = key+1;
             self.store.fileStore.setOpenedFileKey(key);
-            console.log("每个被装进openedfile中的文件为",self);
             self.store.fileStore.pushOpenedFile(self);
             // self.store.viewStore.setEditorIndex(self.store.fileStore.openedFiles.length - 1);
           } else {
@@ -244,7 +243,6 @@ export const FileStore = types
 
     function rename(file, newPath) {
       if (self.store.connect) {
-        console.log("是否要重命名呢");
         self.store.socket.emit('fs.rename', {oldPath: file.path, newPath: newPath}, self.store.handleError);
       } else {
         self.store.handleError({error: "连接已断开"});

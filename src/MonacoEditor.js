@@ -36,19 +36,18 @@ class MonacoEditor extends React.PureComponent {
     });
 
     this.editor.onDidChangeModelContent(e => {
-      console.log("000000000000");
       this.props.file.setContent(this.editor.getValue());
       this.props.file.setDirty(true);
       let index = this.props.store.viewStore.editorIndex;
-      let removeKey = this.props.store.viewStore.removeEditorKey;
-      //这段代码是因为当删除的tab不是正选中的activekey的tab时会触发onDidChangeModelContent事件
-      if(this.props.store.viewStore.removeEditorKeyEvent){
-        return;
-      }
+
       if(index !== -1){
-          let file = this.props.store.fileStore.openedFiles[index];
-          console.log('9999999999999');
-          this.props.store.fileStore.writeFile(file.path, file.content);
+                  // let file = this.props.store.fileStore.openedFiles[index];
+          let files = this.props.store.fileStore.openedFiles;
+          for(let i = 0;i<files.length;i++){
+              if(files[i].id === index){
+                  this.props.store.fileStore.writeFile(files[i].path, files[i].content);
+              }
+          }
       }
     })
   }

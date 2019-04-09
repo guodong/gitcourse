@@ -33,7 +33,6 @@ export const Scenario = types
     }
 
     function setSocket(socket) {
-      console.log("11111111",socket);
       self.socket = socket;
     }
 
@@ -43,7 +42,7 @@ export const Scenario = types
           const workspace = {};
           workspace.dockerImage = 'cpp';
           workspace.type = 'terminal';
-        const json = yield fetch('http://api.v1.kfcoding.com/api/basic/eci/workspace', {
+        const json = yield fetch('http://api.kfcoding.com/api/basic/eci/workspace', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -52,15 +51,14 @@ export const Scenario = types
           method: 'POST',
           body: JSON.stringify(workspace)
         }).then(resp => resp.json());
-        console.log("22222222",json);
+        let containerName = JSON.parse(json.data.containerName);
         // self.socket.ws = io.connect("http://test.sc.kfcoding.com", {transports: ["websocket"], reconnection: true});
-        let socket = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
-        console.log("666666",socket);
+        // let socket = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
+        let socket = io(containerName.data[0].term, {'timeout': 5000, 'connect timeout': 5000});
         self.store.setSocket(socket);
         self.store.socket.on('connect',()=>{
             self.store.setConnect(true);
         })
-        console.log("3333333",self.store);
         self.store.socket.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
         self.store.socket.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
         // self.socket = io(json.data[0].term);
