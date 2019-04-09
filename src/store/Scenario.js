@@ -32,17 +32,17 @@ export const Scenario = types
 
     const createContainer = flow(function*() {
       try {
-        const json = yield fetch('http://container.eci.kfcoding.com/containers/workspace', {
+        const json = yield fetch('http://api.v1.kfcoding.com/api/basic/eci', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: 'Basic ' + b64EncodeUnicode('admin:admin')
           },
           method: 'POST',
-          body: JSON.stringify({image: 'cpp'})
+          body: JSON.stringify({dockerImage: 'cpp'})
         }).then(resp => resp.json());
         console.log(json)
-        self.socket.ws = io.connect(json.data[0].term, {transports: ["websocket"], reconnection: true});
+        self.socket.ws = io.connect(JSON.parse(json.data.containerName).data[0].term, {transports: ["websocket"], reconnection: true});
         self.socket.ws.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
         self.socket.ws.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
         // self.socket = io(json.data[0].term);

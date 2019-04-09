@@ -32,7 +32,7 @@ class Step extends Component {
           }
           {this.props.store.stepIndex == scenario.steps.length - 1 &&
           <Button type="primary" style={{float: 'right'}} onClick={() => {
-            // this.props.store.setPage('');
+            this.props.store.setCurrentScenario(null);
           }}>
             返回目录<Icon type="book"/>
           </Button>
