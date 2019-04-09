@@ -224,9 +224,10 @@ export const FileStore = types
         self.store.socket.emit('fs.writefile', {path: path, content: content || ''}, (res) => {
           if (res.error) {
             self.store.handleError(res);
-          } else {
-            self.store.handleSuccess("保存成功");
           }
+          // else {
+          //   self.store.handleSuccess("保存成功");
+          // }
         });
       } else {
         self.store.handleError({error: "连接已断开"});
@@ -243,6 +244,7 @@ export const FileStore = types
 
     function rename(file, newPath) {
       if (self.store.connect) {
+        console.log("是否要重命名呢");
         self.store.socket.emit('fs.rename', {oldPath: file.path, newPath: newPath}, self.store.handleError);
       } else {
         self.store.handleError({error: "连接已断开"});

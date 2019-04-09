@@ -6,10 +6,14 @@ export const ViewStore = types
     loading: true,
     loadingMsg: 'Loading...',
     bottomHeight: 30,
-    workOpen: false
+    workOpen: false,
+    removeEditorKeyEvent: false,
   }).actions(self => ({
     setEditorIndex(idx) {
       self.editorIndex = parseInt(idx);
+    },
+    setRemoveEditorKeyEvent(flag){
+      self.removeEditorKey = flag;
     },
     setLoading(loading) {
       self.loading = loading;

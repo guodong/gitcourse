@@ -1,7 +1,7 @@
 import React from 'react';
 import SplitPane from "react-split-pane";
-import MonacoEditor from 'react-monaco-editor';
-// import MonacoEditor from './MonacoEditor';
+// import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor from './MonacoEditor';
 // import {Tree} from "antd";
 import { Tabs } from 'antd';
 import FileTree from './FileTree/index';
@@ -96,14 +96,12 @@ class Editor extends React.Component {
     }
 
     remove = (targetKey) => {
-        console.log("remove的targetkey的类型",targetKey);
+        this.props.store.viewStore.setRemoveEditorKeyEvent(true);
         let activeKey = this.props.store.viewStore.editorIndex;
-        console.log("activeKey的值为",activeKey);
         let lastIndex ,panes;
         panes = this.props.store.fileStore.openedFiles;
         panes.forEach((pane, i) => {
             if (pane.id === parseInt(targetKey)) {
-                console.log("999999999");
                 lastIndex = i - 1;
                 this.props.store.fileStore.removeOpenedFile(pane);
             }
@@ -152,7 +150,7 @@ class Editor extends React.Component {
                 <SplitPane
                     defaultSize={256}
                     onDragStarted={this.onDragStarted}
-                    pane2Style={{overflow: 'hidden'}}
+                    pane2Style={{overflow: 'hidden',height: '100%'}}
                 >
                     <FileTree/>
                     <Tabs
@@ -160,16 +158,17 @@ class Editor extends React.Component {
                         activeKey={`${this.props.store.viewStore.editorIndex}`}
                         type="editable-card"
                         onEdit={this.onEdit}
+                        style={{height: '100%'}}
                     >
                         {this.props.store.fileStore.openedFiles.map(t => <TabPane
                             tab={t.name}
                             key={`${t.id}`}
                             closable="true"
                             style={{
-                            height: 'calc(100% - 25px)',
+                            height: '100%',
                             background: '#000'
                         }}>
-                            <MonacoEditor width='100%' height='2000' language={mimeToType(t.type)} value={t.content} options={editorOptions} file={t}/>
+                            <MonacoEditor style={{width:'100%',height:'100%'}} language={mimeToType(t.type)} value={t.content} options={editorOptions} file={t}/>
                         </TabPane>
                         )}
                     </Tabs>
