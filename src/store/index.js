@@ -38,6 +38,21 @@ export const Store = types.model('Store', {
     self.course = config;
 
   })
+
+  const startTrain = flow(function*(repo) {
+    const json = yield fetch('http://api.kfcoding.com/api/practice/trains/competition', {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: 'Basic eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTQ4MTgzMjJ9.V-GGoVaql1XktoaRC27bFcmwWB6AM731ypVyK650RablOr6H-l9wQZY1wXCFfH2ke0mOO2A7kP7cOJkprHL9x9-SItyms1GtBtNB--Jb8QPn7zUecdh3_jIEwTGcUGz-v_2iFPnkeCW3LuUTU05YgXH4iuf7nTa616lDlRQMj7Y'
+      },
+      method: 'POST',
+      body: JSON.stringify({gitUrl: repo})
+    }).then(resp => resp.json());
+    console.log(json);
+    return json;
+  })
+
   return {
     afterCreate: flow(function*() {
       let repo = window.location.hash.substr(1);
@@ -45,8 +60,10 @@ export const Store = types.model('Store', {
       yield pify(browserfs.configure)({fs: "IndexedDB", options: {}});
       self.bfs = browserfs.BFSRequire('fs');
       self.pfs = pify(self.bfs);
-      // yield pfs.
       yield fetchCourse(repo);
+
+      yield startTrain(repo);
+
 
     }),
     setRepo(repo) {

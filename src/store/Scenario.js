@@ -8,6 +8,7 @@ export const Scenario = types
   .model('Scenario', {
     title: '',
     description: '',
+    environment: '',
     steps: types.array(Step),
     terminals: types.array(Terminal),
   }).volatile(self => ({
@@ -32,14 +33,14 @@ export const Scenario = types
 
     const createContainer = flow(function*() {
       try {
-        const json = yield fetch('http://api.v1.kfcoding.com/api/basic/eci', {
+        const json = yield fetch(window._env_.CONTAINER_ENDPOINT + '/container/workspace', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: 'Basic ' + b64EncodeUnicode('admin:admin')
           },
           method: 'POST',
-          body: JSON.stringify({dockerImage: 'cpp'})
+          body: JSON.stringify({image: self.environment})
         }).then(resp => resp.json());
         console.log(json)
         self.socket.ws = io.connect(JSON.parse(json.data.containerName).data[0].term, {transports: ["websocket"], reconnection: true});
