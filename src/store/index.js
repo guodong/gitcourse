@@ -2,8 +2,11 @@ import {types, flow} from 'mobx-state-tree';
 import * as browserfs from "browserfs";
 import * as pify from "pify";
 import * as git from "isomorphic-git";
+import {notification} from 'antd';
 import {Course} from "./Course";
+import {FileStore} from "./FileStore";
 import {Scenario} from "./Scenario";
+import {ViewStore} from "./ViewStore";
 
 export const Store = types.model('Store', {
   loading: true,
@@ -11,12 +14,18 @@ export const Store = types.model('Store', {
   course: types.optional(Course, {}),
   stepIndex: 0,
   view: 'terminal',
-  dir: new Date().getTime().toString()
+  dir: new Date().getTime().toString(),
   // currentScenario: types.maybe(types.reference(Scenario))
+  fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
+  connect: false,
+  ScenarioStore: types.optional(Scenario, {}),
+  viewStore: types.optional(ViewStore, {}),
+
 }).volatile(self => ({
   bfs: {},
   pfs: {},
-  currentScenario: null
+  currentScenario: null,
+  socket: null,
 })).actions(self => {
   const fetchCourse = flow(function* (repo) {
     git.plugins.set('fs', self.bfs);
@@ -39,7 +48,7 @@ export const Store = types.model('Store', {
 
   })
 
-  const startTrain = flow(function*(repo) {
+  const startTrain = flow(function* (repo) {
     const json = yield fetch('http://api.kfcoding.com/api/practice/trains/competition', {
       headers: {
         Accept: 'application/json',
@@ -53,8 +62,26 @@ export const Store = types.model('Store', {
     return json;
   })
 
+  function setSocket(socket) {
+    self.socket = socket;
+  }
+
+  function setConnect(flag) {
+    self.connect = flag;
+  }
+
+  function handleSuccess(msg) {
+    notification.success({message: "操作成功", description: msg})
+  }
+
+  function handleError(data) {
+    if (data.error) {
+      notification.error({message: "操作失败", description: data.error})
+    }
+  }
+
   return {
-    afterCreate: flow(function*() {
+    afterCreate: flow(function* () {
       let repo = window.location.hash.substr(1);
       self.repo = repo;
       yield pify(browserfs.configure)({fs: "IndexedDB", options: {}});
@@ -66,6 +93,10 @@ export const Store = types.model('Store', {
 
 
     }),
+    setSocket,
+    setConnect,
+    handleSuccess,
+    handleError,
     setRepo(repo) {
       self.repo = repo
     },
