@@ -7,7 +7,6 @@ export const Course = types
     title: '',
     description: '',
     author: '',
-    // groups: types.array(Group)
     scenarios: types.array(Scenario)
   }).volatile(self => ({
     scenarioDirs: []

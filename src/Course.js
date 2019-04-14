@@ -25,16 +25,24 @@ class Course extends Component {
             <Card title='课程列表' style={{marginBottom: 30}}>
               <List itemLayout="horizontal">
 
-                {this.props.store.course.scenarios.map(s =>
-                  <List.Item key={s}>
-                    <List.Item.Meta
-                      avatar={<Icon type="check-circle" theme="twoTone" twoToneColor="#52c41a" style={{fontSize: 32}}/>}
-                      title={s.title}
-                      description={'共 ' + s.steps.length + ' 个步骤'}
-                    />
-                    <Link to={'/scenario' + window.location.hash}><Button type='primary'
-                                                                              onClick={() => this.props.store.setCurrentScenario(s)}>开始学习</Button></Link>
-                  </List.Item>
+                {this.props.store.course.scenarios.map((s, index) => {
+                    let color = s.visited ? '#52c41a' : '#ccc';
+                    return <List.Item key={s}>
+                      <List.Item.Meta
+                        avatar={
+                          <Icon type="check-circle" theme="twoTone" twoToneColor={color} style={{fontSize: 32}}/>
+                        }
+                        title={s.title}
+                        description={'共 ' + s.steps.length + ' 个步骤'}
+                      />
+                      {index <= this.props.store.completeIndex ?
+                        <Button type='primary'
+                                onClick={() => this.props.store.setCurrentScenario(s, index)}>开始学习</Button>
+                        :
+                        <Button type='default' disabled>请先学习先导课程</Button>
+                      }
+                    </List.Item>
+                  }
                 )}
               </List>
 

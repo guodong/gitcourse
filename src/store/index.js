@@ -15,17 +15,17 @@ export const Store = types.model('Store', {
   stepIndex: 0,
   view: 'terminal',
   dir: new Date().getTime().toString(),
-  // currentScenario: types.maybe(types.reference(Scenario))
   fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
   connect: false,
-  ScenarioStore: types.optional(Scenario, {}),
   viewStore: types.optional(ViewStore, {}),
-
 }).volatile(self => ({
   bfs: {},
   pfs: {},
   currentScenario: null,
   socket: null,
+  completeIndex: 0
+})).views(self => ({
+
 })).actions(self => {
   const fetchCourse = flow(function* (repo) {
     git.plugins.set('fs', self.bfs);
@@ -45,7 +45,6 @@ export const Store = types.model('Store', {
     let data = yield self.pfs.readFile(self.dir + '/course.json');
     let config = JSON.parse(data.toString());
     self.course = config;
-
   })
 
   const startTrain = flow(function* (repo) {
@@ -53,12 +52,11 @@ export const Store = types.model('Store', {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: 'Basic eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTQ4MTgzMjJ9.V-GGoVaql1XktoaRC27bFcmwWB6AM731ypVyK650RablOr6H-l9wQZY1wXCFfH2ke0mOO2A7kP7cOJkprHL9x9-SItyms1GtBtNB--Jb8QPn7zUecdh3_jIEwTGcUGz-v_2iFPnkeCW3LuUTU05YgXH4iuf7nTa616lDlRQMj7Y'
+        Authorization: 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTUxNzM3OTl9.fPxoYdlltlRuqxkKLFvh254NU_-sj6N100yIdIwYCzRTuihNP4BhkHxSrO97pbzEFCrKxBp5xR63sGQKSa7pAjRyjdKDlVZJkpbsJO_1KDgEs2hbGwla5vRPDHk1hoExTtpAsObUBiffrb1TUrV2NaGvKNCaNvtjEcbHYJe8qQs'
       },
       method: 'POST',
       body: JSON.stringify({gitUrl: repo})
     }).then(resp => resp.json());
-    console.log(json);
     return json;
   })
 
@@ -100,8 +98,18 @@ export const Store = types.model('Store', {
     setRepo(repo) {
       self.repo = repo
     },
-    setCurrentScenario(scenario) {
+    setCurrentScenario(scenario, index) {
       self.currentScenario = scenario;
+      self.stepIndex = 0;
+      if (scenario != null) {
+        scenario.setVisited(true);
+      }
+      if (index != undefined) {
+        if (index >= self.completeIndex) {
+          self.completeIndex = index + 1;
+          console.log(self.completeIndex)
+        }
+      }
     },
     setView(view) {
       self.view = view;

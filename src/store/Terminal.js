@@ -13,21 +13,22 @@ export const Terminal = types
   })).views(self => ({
     get store() {
       return getRoot(self)
+    },
+    get scenario() {
+      return getParent(self, 2);
     }
   })).actions(self => {
     let terminal = null;
-    let socket = getParent(self, 2).socket;
+    let socket = () => getParent(self, 2).socket;
 
     function afterCreate() {
-      socket = getParent(self, 2).socket;
       terminal = new Xterm({
         fontSize: 16
       });
       self.terminal = terminal;
-      // socket.ws.emit('term.open', {id: '123', cols: terminal.cols, rows: terminal.rows, cwd: '/'});
       terminal.on('data', d=>console.log(d));
       terminal.on('key', (key, ev) => {
-        socket.ws.emit('term.input', {id: '123', input: key});
+        self.scenario.socket.emit('term.input', {id: '123', input: key});
       });
       terminal.on('resize', ({cols, rows}) => {
         // socket && socket.emit('terminal-resize', {cols: cols, rows: rows})

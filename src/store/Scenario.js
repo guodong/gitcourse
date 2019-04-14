@@ -3,8 +3,6 @@ import {Step} from "./Step";
 import {Terminal} from "./Terminal";
 import io from 'socket.io-client';
 
-const uuidv4 = require('uuid/v4');
-
 export const Scenario = types
   .model('Scenario', {
     title: '',
@@ -13,14 +11,8 @@ export const Scenario = types
     steps: types.array(Step),
     terminals: types.array(Terminal),
   }).volatile(self => ({
-    socket: null,
-    // terminals: []
-    // socket: io.connect('//ws.katacoda.com', {
-    //   transports: ["websocket"],
-    //   timeout: 120 * 1e3,
-    //   reconnection: false,
-    //   query: 'dockerimage=dind&course=docker&id=deploying-first-container&originalPathwayId='
-    // })
+    socket: {},
+    visited: false
   })).views(self => ({
     get store() {
       return getRoot(self);
@@ -52,28 +44,18 @@ export const Scenario = types
           },
           method: 'POST',
 
-          body: JSON.stringify(workspace)
+          body: JSON.stringify({image: 'git'})
         }).then(resp => resp.json());
-        let containerName = JSON.parse(json.data.containerName);
-        // self.socket.ws = io.connect("http://test.sc.kfcoding.com", {transports: ["websocket"], reconnection: true});
-        // let socket = io("http://test.sc.kfcoding.com", {'timeout': 5000, 'connect timeout': 5000});
-        let socket = io(containerName.data[0].term, {'timeout': 5000, 'connect timeout': 5000});
-        self.store.setSocket(socket);
-        self.store.socket.on('connect', () => {
-          self.store.setConnect(true);
-        })
-        self.store.socket.emit('term.open', {
-          id: '123',
-          cols: self.terminals[0].cols,
-          rows: self.terminals[0].rows,
-          cwd: '/'
-        });
-        self.store.socket.emit('fs.readdir', {path: '/'}, res => {
-          console.log(res)
-        })
-        // self.socket = io(json.data[0].term);
-        self.store.socket.on('term.output', data => {
+        // let containerName = JSON.parse(json.data.containerName);
+        self.socket = io.connect(json.data[0].term, {transports: ["websocket"], reconnection: true});
+        getRoot(self).setSocket(self.socket);
+        self.socket.emit('term.open', {id: '123', cols: self.terminals[0].cols, rows: self.terminals[0].rows, cwd: '/'});
+        self.socket.emit('fs.readdir', {path: '/'}, res => {console.log(res)})
+        self.socket.on('term.output', data => {
           self.terminals[0].terminal.write(data.output)
+        })
+        self.socket.on('connect', () => {
+          self.store.setConnect(true);
         })
 
       } catch (e) {
@@ -99,6 +81,9 @@ export const Scenario = types
       setSocket,
       addTerminal() {
         self.terminals.push({})
+      },
+      setVisited(flag) {
+        self.visited = flag;
       }
     }
   });
