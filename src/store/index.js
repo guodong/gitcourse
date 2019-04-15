@@ -15,7 +15,6 @@ export const Store = types.model('Store', {
   course: types.optional(Course, {}),
   stepIndex: 0,
   view: 'terminal',
-  dir: new Date().getTime().toString(),
   fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
   connect: false,
   viewStore: types.optional(ViewStore, {}),
@@ -32,23 +31,30 @@ export const Store = types.model('Store', {
   },
   set completeIndex(index) {
     localStorage.setItem('completeIndex', index);
+  },
+  get dir() {
+    return encodeURIComponent(self.repo)
   }
 })).actions(self => {
-  const fetchCourse = flow(function* (repo) {
-    git.plugins.set('fs', self.bfs);
-    // yield git.pull({
-    //   dir: '/',
-    //   ref: 'master',
-    //   fastForwardOnly: true,
-    //   singleBranch: true
-    // })
-    yield git.clone({
-      dir: self.dir,
-      corsProxy: 'https://cors.isomorphic-git.org',
-      url: repo,
-      singleBranch: true,
-      depth: 1
-    });
+  const fetchCourse = flow(function* () {
+    try {
+      yield self.pfs.exists(self.dir);
+
+      yield git.clone({
+        dir: self.dir,
+        corsProxy: 'https://cors.isomorphic-git.org',
+        url: self.repo,
+        singleBranch: true,
+        depth: 1
+      });
+    } catch (e) { // dir exists will goes here
+      yield git.pull({
+        dir: self.dir,
+        ref: 'master',
+        fastForwardOnly: true,
+        singleBranch: true
+      })
+    }
     let data = yield self.pfs.readFile(self.dir + '/course.json');
     let config = JSON.parse(data.toString());
     self.course = config;
@@ -104,6 +110,7 @@ export const Store = types.model('Store', {
       yield pify(browserfs.configure)({fs: "IndexedDB", options: {}});
       self.bfs = browserfs.BFSRequire('fs');
       self.pfs = pify(self.bfs);
+      git.plugins.set('fs', self.bfs);
       yield fetchCourse(repo);
 
       startTrain(repo);

@@ -39,7 +39,7 @@ export const Scenario = types
           },
           method: 'POST',
           body: JSON.stringify({
-            Image: 'ubuntu',
+            Image: 'registry.cn-shanghai.aliyuncs.com/kfcoding/kfcoding-envs:git',
             Cmd: ["bash"],
             AttachStdin: true,
             AttachStdout: true,
