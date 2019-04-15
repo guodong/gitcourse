@@ -60,8 +60,6 @@ export const Store = types.model('Store', {
     self.course = config;
   })
 
-  Cookies.set('token', 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTUzMDkyOTl9.Bmt7_qb3JwUdZvNSLVYDjHvL1RK6wKKieJCOkCbR0cnanWozgEhxszS1Jvp3O8zdSR5rJVt7OIskpUWSZl08HDJvVx1uPuCA9A0S1XRyUYiilHBVoSn24NUYgSZaxgQJAs69y3TAxNm5Z41AmAyw_m3Ap1K9mEMXc0WOhNzT31w')
-
   const startTrain = function (repo) {
     fetch('http://api.kfcoding.com/api/practice/trains/competition/begin', {
       headers: {
