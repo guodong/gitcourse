@@ -58,3 +58,7 @@
 .Resizer.disabled:hover {
     border-color: transparent;
 }
+
+.ant-tabs-content {
+    height: calc(100% - 65px);
+}
