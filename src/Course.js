@@ -13,6 +13,12 @@ const gridStyle = {
 };
 
 class Course extends Component {
+  constructor(props) {
+    super(props);
+  }
+  componentDidMount() {
+
+  }
   render() {
     return (
       <div style={{padding: 50}}>
@@ -26,7 +32,7 @@ class Course extends Component {
               <List itemLayout="horizontal">
 
                 {this.props.store.course.scenarios.map((s, index) => {
-                    let color = s.visited ? '#52c41a' : '#ccc';
+                    let color = index < this.props.store.completeIndex ? '#52c41a' : '#ccc';
                     return <List.Item key={s}>
                       <List.Item.Meta
                         avatar={

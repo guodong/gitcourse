@@ -1,4 +1,4 @@
-import {types, flow} from 'mobx-state-tree';
+import {types, flow, getRoot} from 'mobx-state-tree';
 import * as browserfs from "browserfs";
 import * as pify from "pify";
 import * as git from "isomorphic-git";
@@ -7,6 +7,7 @@ import {Course} from "./Course";
 import {FileStore} from "./FileStore";
 import {Scenario} from "./Scenario";
 import {ViewStore} from "./ViewStore";
+import Cookies from 'js-cookie';
 
 export const Store = types.model('Store', {
   loading: true,
@@ -18,14 +19,20 @@ export const Store = types.model('Store', {
   fileStore: types.optional(FileStore, {openedFiles: [], files: []}),
   connect: false,
   viewStore: types.optional(ViewStore, {}),
+  docker_endpoint: window._env_.DOCKER_ENDPOINT
 }).volatile(self => ({
   bfs: {},
   pfs: {},
   currentScenario: null,
   socket: null,
-  completeIndex: 0
+  cpId: null
 })).views(self => ({
-
+  get completeIndex() {
+    return localStorage.getItem('completeIndex') || 0;
+  },
+  set completeIndex(index) {
+    localStorage.setItem('completeIndex', index);
+  }
 })).actions(self => {
   const fetchCourse = flow(function* (repo) {
     git.plugins.set('fs', self.bfs);
@@ -47,18 +54,30 @@ export const Store = types.model('Store', {
     self.course = config;
   })
 
-  const startTrain = flow(function* (repo) {
-    const json = yield fetch('http://api.kfcoding.com/api/practice/trains/competition', {
+  Cookies.set('token', 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTUzMDkyOTl9.Bmt7_qb3JwUdZvNSLVYDjHvL1RK6wKKieJCOkCbR0cnanWozgEhxszS1Jvp3O8zdSR5rJVt7OIskpUWSZl08HDJvVx1uPuCA9A0S1XRyUYiilHBVoSn24NUYgSZaxgQJAs69y3TAxNm5Z41AmAyw_m3Ap1K9mEMXc0WOhNzT31w')
+
+  const startTrain = function (repo) {
+    fetch('http://api.kfcoding.com/api/practice/trains/competition/begin', {
       headers: {
-        Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: 'eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyQGtmY29kaW5nLmNvbSIsInVzZXJJZCI6IjIxZDYyNzI3YWVjYTRiMzViYmQzYTUxZWU0N2ExMjU4IiwibmFtZSI6InRlYWNoZXJAa2Zjb2RpbmcuY29tIiwicm9sZSI6InRlYWNoZXIiLCJleHAiOjE1NTUxNzM3OTl9.fPxoYdlltlRuqxkKLFvh254NU_-sj6N100yIdIwYCzRTuihNP4BhkHxSrO97pbzEFCrKxBp5xR63sGQKSa7pAjRyjdKDlVZJkpbsJO_1KDgEs2hbGwla5vRPDHk1hoExTtpAsObUBiffrb1TUrV2NaGvKNCaNvtjEcbHYJe8qQs'
+        Authorization: Cookies.get('token')
       },
       method: 'POST',
-      body: JSON.stringify({gitUrl: repo})
+      body: JSON.stringify({repo: repo})
+    }).then(resp => resp.json())
+      .then(data => getRoot(self).setCpId(data.data.id));
+  }
+
+  const stopTrain = function () {
+    fetch('http://api.kfcoding.com/api/practice/trains/competition/end', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: Cookies.get('token')
+      },
+      method: 'PUT',
+      body: JSON.stringify({id: self.cpId})
     }).then(resp => resp.json());
-    return json;
-  })
+  }
 
   function setSocket(socket) {
     self.socket = socket;
@@ -87,7 +106,7 @@ export const Store = types.model('Store', {
       self.pfs = pify(self.bfs);
       yield fetchCourse(repo);
 
-      yield startTrain(repo);
+      startTrain(repo);
 
 
     }),
@@ -101,13 +120,18 @@ export const Store = types.model('Store', {
     setCurrentScenario(scenario, index) {
       self.currentScenario = scenario;
       self.stepIndex = 0;
+
       if (scenario != null) {
         scenario.setVisited(true);
+      } else {
+        if (self.completeIndex == self.course.scenarios.length) {
+          stopTrain()
+        }
       }
       if (index != undefined) {
         if (index >= self.completeIndex) {
-          self.completeIndex = index + 1;
-          console.log(self.completeIndex)
+          let ci = index + 1;
+          localStorage.setItem('completeIndex', ci)
         }
       }
     },
@@ -120,5 +144,8 @@ export const Store = types.model('Store', {
     prevStep() {
       self.stepIndex--;
     },
+    setCpId(id) {
+      self.cpId = id;
+    }
   }
 })

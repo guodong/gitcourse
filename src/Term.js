@@ -56,10 +56,10 @@ class Term extends React.Component {
       <Tabs
         onChange={this.onChange}
         activeKey={this.state.activeKey}
-        type="editable-card"
         onEdit={this.onEdit}
+        style={{height: '100%'}}
       >
-        {this.props.scenario.terminals.map(pane => <Tabs.TabPane tab='Terminal' key={pane.id} closable='true'>
+        {this.props.scenario.terminals.map(pane => <Tabs.TabPane tab='Terminal' key={pane.id} closable='false' style={{height: '100%'}}>
           <div ref={dom => this.dom = dom} style={{width: '100%', height: '100%'}}></div>
         </Tabs.TabPane>)}
       </Tabs>

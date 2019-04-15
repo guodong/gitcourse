@@ -29,16 +29,16 @@ class Scenario extends Component {
 
         </div>
         <div style={{height: '100%', background: '#000', overflow: 'hidden'}}>
-          <div style={{height: 40, background: '#333', paddingRight: 10, textAlign: 'right'}}>
-            <Icon type="code" style={{fontSize: '20px', marginTop: 10, marginRight: 10, color: '#fff'}}
-                  onClick={() => this.props.store.setView('terminal')}/>
-            <Icon type="appstore" style={{fontSize: '20px', marginTop: 10, marginRight: 10, color: '#fff'}}
-                  onClick={() => this.props.store.setView('ide')}/>
-            <Icon type="desktop" style={{fontSize: '20px', marginTop: 10, color: '#fff'}}
-                  onClick={() => this.props.store.setView('ide')}/>
-          </div>
+          {/*<div style={{height: 40, background: '#333', paddingRight: 10, textAlign: 'right'}}>*/}
+            {/*<Icon type="code" style={{fontSize: '20px', marginTop: 10, marginRight: 10, color: '#fff'}}*/}
+                  {/*onClick={() => this.props.store.setView('terminal')}/>*/}
+            {/*<Icon type="appstore" style={{fontSize: '20px', marginTop: 10, marginRight: 10, color: '#fff'}}*/}
+                  {/*onClick={() => this.props.store.setView('ide')}/>*/}
+            {/*<Icon type="desktop" style={{fontSize: '20px', marginTop: 10, color: '#fff'}}*/}
+                  {/*onClick={() => this.props.store.setView('ide')}/>*/}
+          {/*</div>*/}
           {this.props.store.view == 'terminal' &&
-          <Term scenario={scenario}/>
+          <Term scenario={scenario} style={{height: '100%'}}/>
           }
           {this.props.store.view == 'ide' &&
           <Editor/>
