@@ -10,7 +10,6 @@ import {ViewStore} from "./ViewStore";
 import Cookies from 'js-cookie';
 
 export const Store = types.model('Store', {
-  loading: true,
   repo: '',
   course: types.optional(Course, {}),
   stepIndex: 0,
@@ -24,7 +23,8 @@ export const Store = types.model('Store', {
   pfs: {},
   currentScenario: null,
   socket: null,
-  cpId: null
+  cpId: null,
+  loading: true
 })).views(self => ({
   get completeIndex() {
     return localStorage.getItem('completeIndex') || 0;
@@ -58,6 +58,7 @@ export const Store = types.model('Store', {
     let data = yield self.pfs.readFile(self.dir + '/course.json');
     let config = JSON.parse(data.toString());
     self.course = config;
+    self.loading = false;
   })
 
   const startTrain = function (repo) {

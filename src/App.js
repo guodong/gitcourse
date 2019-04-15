@@ -5,6 +5,7 @@ import {inject, observer} from "mobx-react";
 import {Route, BrowserRouter as Router} from "react-router-dom";
 import Course from "./Course";
 import Scenario from "./Scenario";
+import LoadingPage from "./LoadingPage";
 
 const {Header, Content, Footer} = Layout;
 const gridStyle = {
@@ -30,6 +31,7 @@ class App extends Component {
           }
           {/*<Route exact path="/" component={Course}/>*/}
           {/*<Route path="/scenario" component={Scenario}/>*/}
+          {this.props.store.loading && <LoadingPage/>}
         </div>
       </Router>
     );
